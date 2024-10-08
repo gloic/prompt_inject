@@ -2,7 +2,9 @@
 
 ## Description
 
-Permits to use __name__ syntax to inject the content of one or more text files in your prompt.
+This is an extension for https://github.com/oobabooga/text-generation-webui
+
+It permits to use __name__ syntax to inject the content of one or more text files in your prompt.
 
 Inspired by https://github.com/AUTOMATIC1111/stable-diffusion-webui-wildcards
 
@@ -20,4 +22,9 @@ TODO
 Not yet
 
 ## Usage through API
-TODO
+TOD
+
+## Other
+
+This extension is inspired by https://github.com/AUTOMATIC1111/stable-diffusion-webui-wildcards
+

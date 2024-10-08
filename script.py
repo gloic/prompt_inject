@@ -77,7 +77,7 @@ def chat_input_modifier(text, visible_text, state):
                 print("content=")
                 print(content)
                 text = re.sub(r'__' + match + '__', content, text)
-                visible_text = text
+                # visible_text = text
 
     return text, visible_text
 
