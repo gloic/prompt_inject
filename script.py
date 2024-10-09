@@ -59,6 +59,16 @@ def state_modifier(state):
     return state
 
 
+def get_files():
+    this_dir = Path(__file__).parent.resolve()
+    files = []
+    for folder_name, subfolders, filenames in os.walk(this_dir):
+        for filename in filenames:
+            if filename.endswith(".txt"):
+                files.append(os.path.join(folder_name, filename))
+    return files
+
+
 def contains_wildcards(text):
     """
     Returns true when the input text contains at least one wildcard.
