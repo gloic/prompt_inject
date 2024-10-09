@@ -10,7 +10,7 @@ generation time.
 import gradio as gr
 import os
 import re
-import torch
+from pathlib import Path
 from transformers import LogitsProcessor
 
 from modules import chat, shared
@@ -21,15 +21,18 @@ from modules.text_generation import (
 )
 
 params = {
-    "display_name": "Example Extension",
+    "display_name": "Prompt Inject",
     "is_tab": False,
+    "extension": ".txt"
 }
+
 
 class MyLogits(LogitsProcessor):
     """
     Manipulates the probabilities for the next token before it gets sampled.
     Used in the logits_processor_modifier function below.
     """
+
     def __init__(self):
         pass
 
@@ -39,12 +42,14 @@ class MyLogits(LogitsProcessor):
         # scores = torch.log(probs / (1 - probs))
         return scores
 
+
 def history_modifier(history):
     """
     Modifies the chat history.
     Only used in chat mode.
     """
     return history
+
 
 def state_modifier(state):
     """
@@ -53,33 +58,56 @@ def state_modifier(state):
     """
     return state
 
+
+def contains_wildcards(text):
+    """
+    Returns true when the input text contains at least one wildcard.
+    """
+    return re.search(r'__(.*?)__', text) is not None
+
+
+def replace_wildcard(text):
+    matches = re.findall(r'__(.*?)__', text)
+
+    for match in matches:
+        content = get_wildcard_content(match)
+        if content is not None:
+            text = text.replace('__' + match + '__', content)
+
+    return text
+
+
+def get_wildcard_content(match):
+    filename = match + ".txt"
+    file_path = os.path.join('extensions/prompt_inject/prompts', *filename.split('/'))
+    if os.path.exists(file_path):
+        print("File found:", file_path)
+        with open(file_path, "r") as file:
+            content = file.read().strip()
+            if contains_wildcards(content):
+                return replace_wildcard(content)
+            else:
+                return content
+    else:
+        return None
+
+
 def chat_input_modifier(text, visible_text, state):
     """
     Modifies the user input string in chat mode (visible_text).
     You can also modify the internal representation of the user
     input (text) to change how it will appear in the prompt.
     """
-    directory = 'extensions/prompt-inject/prompts'
-    extension = '.txt'
-    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-    print(files)
 
-    matches = re.findall(r'__(.*?)__', text)
-    print(matches)
+    if not contains_wildcards(text):
+        return text, visible_text
 
-    for match in matches:
-        filename = match + extension
-        if filename in files:
-            print("file found")
-            fpath = os.path.join(directory, filename)
-            with open(fpath, "r") as f:
-                content = f.read()
-                print("content=")
-                print(content)
-                text = re.sub(r'__' + match + '__', content, text)
-                # visible_text = text
+    # files = get_files()
+
+    text = replace_wildcard(text)
 
     return text, visible_text
+
 
 def input_modifier(string, state, is_chat=False):
     """
@@ -90,12 +118,14 @@ def input_modifier(string, state, is_chat=False):
     """
     return string
 
+
 def bot_prefix_modifier(string, state):
     """
     Modifies the prefix for the next bot reply in chat mode.
     By default, the prefix will be something like "Bot Name:".
     """
     return string
+
 
 def tokenizer_modifier(state, prompt, input_ids, input_embeds):
     """
@@ -104,6 +134,7 @@ def tokenizer_modifier(state, prompt, input_ids, input_embeds):
     Only used by loaders that use the transformers library for sampling.
     """
     return prompt, input_ids, input_embeds
+
 
 def logits_processor_modifier(processor_list, input_ids):
     """
@@ -114,6 +145,7 @@ def logits_processor_modifier(processor_list, input_ids):
     processor_list.append(MyLogits())
     return processor_list
 
+
 def output_modifier(string, state, is_chat=False):
     """
     Modifies the LLM output before it gets presented.
@@ -123,6 +155,7 @@ def output_modifier(string, state, is_chat=False):
     """
     return string
 
+
 def custom_generate_chat_prompt(user_input, state, **kwargs):
     """
     Replaces the function that generates the prompt from the chat history.
@@ -131,11 +164,13 @@ def custom_generate_chat_prompt(user_input, state, **kwargs):
     result = chat.generate_chat_prompt(user_input, state, **kwargs)
     return result
 
+
 def custom_css():
     """
     Returns a CSS string that gets appended to the CSS for the webui.
     """
     return ''
+
 
 def custom_js():
     """
@@ -144,11 +179,13 @@ def custom_js():
     """
     return ''
 
+
 def setup():
     """
     Gets executed only once, when the extension is imported.
     """
     pass
+
 
 def ui():
     """
