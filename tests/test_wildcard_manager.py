@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 
-from extensions.prompt_inject.wildcards_manager import WildcardManager
+from wildcards_manager import WildcardManager
 
 
 class TestWildcardManager(unittest.TestCase):
@@ -36,33 +36,36 @@ class TestWildcardManager(unittest.TestCase):
             file.write(content)
 
     def test_should_check_if_contains_wildcards(self):
-        self.assertTrue(self.manager.contains_wildcards('This is a __test__'))
-        self.assertFalse(self.manager.contains_wildcards('This is a text without wildcards'))
+        with_wildcard = 'This is a __test__'
+        without_wildcards = 'This is a text without wildcards'
+
+        result_with = self.manager.contains_wildcards(with_wildcard)
+        result_without = self.manager.contains_wildcards(without_wildcards)
+
+        self.assertTrue(result_with)
+        self.assertFalse(result_without)
 
     def test_should_retrieve_content(self):
         self.create_file('name.txt', "Bobby")
 
         result = self.manager.get_wildcard_content('name')
 
-        self.assertEqual(result, 'Bobby')
+        self.assertEqual('Bobby', result)
 
     def test_should_retrieve_content_from_subfolder(self):
-        sub_dir = os.path.join(self.test_dir, "sub")
-        os.makedirs(sub_dir, exist_ok=True)
-        with open(os.path.join(sub_dir, 'name.txt'), 'w') as file:
-            file.write('Bobby')
+        self.create_file('name.txt', "Bobby", self.sub_dir)
 
         result = self.manager.get_wildcard_content('sub/name')
 
-        self.assertEqual(result, 'Bobby')
+        self.assertEqual('Bobby', result)
 
     def test_should_replace_wildcards(self):
-        self.create_file('content.txt', "working")
-        text = 'it\'s __content__'
+        self.create_file('Content.txt', "working")
+        text = 'it\'s __Content__'
 
         result = self.manager.replace_wildcard(text)
 
-        self.assertEqual(result, 'it\'s working')
+        self.assertEqual('it\'s working', result)
 
     def test_should_replace_nested_wildcards(self):
         self.create_file('parent.txt', "Parent and __nested__")
@@ -89,14 +92,14 @@ class TestWildcardManager(unittest.TestCase):
 
         result = self.manager.replace_wildcard(text)
 
-        self.assertEqual(result, 'This is important')
+        self.assertEqual('This is important', result)
 
     def test_should_replace_multiple_special_wildcards(self):
         text = '__!?__'
 
         result = self.manager.replace_wildcard(text)
 
-        self.assertEqual(result, 'This is importantThis is a question')
+        self.assertEqual('This is importantThis is a question', result)
 
     def test_should_replace_special_wildcards_with_text(self):
         self.create_file('hello.txt', "Hello")
@@ -105,9 +108,9 @@ class TestWildcardManager(unittest.TestCase):
         question_result = self.manager.replace_wildcard('__?hello__')
         cot_result = self.manager.replace_wildcard('__&hello__')
 
-        self.assertEqual(exclamation_result, 'This is importantHello')
-        self.assertEqual(question_result, 'This is a questionHello')
-        self.assertEqual(cot_result, 'This is COTHello')
+        self.assertEqual('This is importantHello', exclamation_result)
+        self.assertEqual('This is a questionHello', question_result)
+        self.assertEqual('This is COTHello', cot_result)
 
     def test_should_replace_special_nested_wildcards(self):
         self.create_file('hello.txt', "Hello __name__, __&riddle__")
@@ -116,7 +119,26 @@ class TestWildcardManager(unittest.TestCase):
 
         result = self.manager.replace_wildcard('__!hello__')
 
-        self.assertEqual(result, 'This is importantHello Bob, This is COTI am the one who I am but not what you are')
+        self.assertEqual('This is importantHello Bob'
+                         ', This is COTI am the one who I am but not what you are', result)
+
+    def test_should_concat_multiple_wildcards(self):
+        self.create_file('part1.txt', "Part1")
+        self.create_file('part2.txt', "Part2")
+
+        result = self.manager.replace_wildcard('__part1&& part2__')
+
+        self.assertEqual('Part1Part2', result)
+
+    def test_should_return_random_wildcards(self):
+        self.create_file('odd.txt', "Odd")
+        self.create_file('even.txt', "Even")
+        self.create_file('Ded.txt', "Ded", self.sub_dir)
+        expected_values = ['Odd', 'Even', 'Ded']
+
+        result = self.manager.replace_wildcard('__odd || even || sub/Ded__')
+
+        self.assertIn(result, expected_values)
 
 
 if __name__ == '__main__':
