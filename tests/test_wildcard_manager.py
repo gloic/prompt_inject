@@ -42,9 +42,9 @@ class TestWildcardManager(unittest.TestCase):
     def test_should_retrieve_content(self):
         self.create_file('name.txt', "Bobby")
 
-        content = self.manager.get_wildcard_content('name')
+        result = self.manager.get_wildcard_content('name')
 
-        self.assertEqual(content, 'Bobby')
+        self.assertEqual(result, 'Bobby')
 
     def test_should_retrieve_content_from_subfolder(self):
         sub_dir = os.path.join(self.test_dir, "sub")
@@ -52,29 +52,30 @@ class TestWildcardManager(unittest.TestCase):
         with open(os.path.join(sub_dir, 'name.txt'), 'w') as file:
             file.write('Bobby')
 
-        content = self.manager.get_wildcard_content('sub/name')
+        result = self.manager.get_wildcard_content('sub/name')
 
-        self.assertEqual(content, 'Bobby')
+        self.assertEqual(result, 'Bobby')
 
     def test_should_replace_wildcards(self):
         self.create_file('content.txt', "working")
-
         text = 'it\'s __content__'
-        replaced_text = self.manager.replace_wildcard(text)
 
-        self.assertEqual(replaced_text, 'it\'s working')
+        result = self.manager.replace_wildcard(text)
+
+        self.assertEqual(result, 'it\'s working')
 
     def test_should_replace_nested_wildcards(self):
         self.create_file('parent.txt', "Parent and __nested__")
         self.create_file('nested.txt', "Nested")
-
         text = '__parent__'
-        replaced_text = self.manager.replace_wildcard(text)
 
-        self.assertEqual(replaced_text, 'Parent and Nested')
+        result = self.manager.replace_wildcard(text)
+
+        self.assertEqual(result, 'Parent and Nested')
 
     def test_should_retrieve_special_wildcard_content(self):
         text = 'specials/exclamation_mark'
+
         result = self.manager.get_wildcard_content(text)
 
         self.assertEqual(result, 'This is important')
@@ -84,22 +85,29 @@ class TestWildcardManager(unittest.TestCase):
         self.assertFalse(self.manager.contains_special('special'))
 
     def test_should_replace_special_wildcards(self):
-
         text = '__!__'
-        replaced_text = self.manager.replace_wildcard(text)
 
-        self.assertEqual(replaced_text, 'This is important')
+        result = self.manager.replace_wildcard(text)
+
+        self.assertEqual(result, 'This is important')
+
+    def test_should_replace_multiple_special_wildcards(self):
+        text = '__!?__'
+
+        result = self.manager.replace_wildcard(text)
+
+        self.assertEqual(result, 'This is importantThis is a question')
 
     def test_should_replace_special_wildcards_with_text(self):
         self.create_file('hello.txt', "Hello")
 
-        exclamation_text = self.manager.replace_wildcard('__!hello__')
-        question_text = self.manager.replace_wildcard('__?hello__')
-        cot_text = self.manager.replace_wildcard('__&hello__')
+        exclamation_result = self.manager.replace_wildcard('__!hello__')
+        question_result = self.manager.replace_wildcard('__?hello__')
+        cot_result = self.manager.replace_wildcard('__&hello__')
 
-        self.assertEqual(exclamation_text, 'This is importantHello')
-        self.assertEqual(question_text, 'This is a questionHello')
-        self.assertEqual(cot_text, 'This is COTHello')
+        self.assertEqual(exclamation_result, 'This is importantHello')
+        self.assertEqual(question_result, 'This is a questionHello')
+        self.assertEqual(cot_result, 'This is COTHello')
 
     def test_should_replace_special_nested_wildcards(self):
         self.create_file('hello.txt', "Hello __name__, __&riddle__")
