@@ -8,10 +8,11 @@ class WildcardManager:
         # self.left_pattern = '__'
         # self.right_pattern = '__'
 
+        self.specials_dir = 'specials/'
         self.specials = {
-            '!', 'exclamation_mark',
-            '?', 'question_mark',
-            '&', 'ampersand'
+            '!': 'exclamation_mark',
+            '?': 'question_mark',
+            '&': 'ampersand'
         }
 
     def contains_wildcards(self, text):
@@ -20,23 +21,42 @@ class WildcardManager:
         """
         return re.search(r'__(.*?)__', text) is not None
 
-    def contains_special(self, match):
-        first = match[0]
-        return first in self.specials
-
-    def replace_specials(self, match):
-        print('cucu')
+    def contains_special(self, wildcard):
+        """
+        Returns true when the input text contains at least one special wildcard.
+        """
+        if wildcard:
+            first = wildcard[0]
+            return first in self.specials
 
     def replace_wildcard(self, text):
-        matches = re.findall(r'__(.*?)__', text)
+        """
+        Process a given string by replacing all wildcards and specials wildcard recursively.
+        Returns retrieved value of the wildcard
+        """
+        matches = re.finditer(r'__(.*?)__', text)
 
         for match in matches:
-            specials_content = self.replace_specials(match)
-            content = self.get_wildcard_content(match)
-            if content is not None:
-                text = text.replace('__' + match + '__', content)
+            wildcard = match.group(1)
+            special_content, wildcard = self.process_specials(wildcard)
+            content = self.get_wildcard_content(wildcard)
+
+            if special_content or content:
+                text = text.replace('__' + match.group(1) + '__', special_content + content)
 
         return text
+
+    def process_specials(self, wildcard):
+        special_content = ''
+
+        while self.contains_special(wildcard):
+            current = wildcard[0]
+            wildcard = wildcard[1:]
+            current_content = self.get_special_content(current)
+            if current_content is not None:
+                special_content += current_content
+
+        return special_content, wildcard
 
     def get_wildcard_content(self, match):
         filename = match + ".txt"
@@ -50,4 +70,8 @@ class WildcardManager:
                 else:
                     return content
         else:
-            return None
+            return ''
+
+    def get_special_content(self, wildcard):
+        special = self.specials_dir + self.specials.get(wildcard)
+        return self.get_wildcard_content(special)
