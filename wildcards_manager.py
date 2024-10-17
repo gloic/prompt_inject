@@ -1,12 +1,15 @@
 import os
 import re
+import random
 
 
 class WildcardManager:
     def __init__(self, base_path='extensions/prompt_inject/prompts'):
         self.base_path = base_path
-        # self.left_pattern = '__'
-        # self.right_pattern = '__'
+        self.left_pattern = '__'
+        self.right_pattern = '__'
+        self.and_pattern = '&&'
+        self.or_pattern = '||'
 
         self.specials_dir = 'specials/'
         self.specials = {
@@ -19,7 +22,9 @@ class WildcardManager:
         """
         Returns true when the input text contains at least one wildcard.
         """
-        return re.search(r'__(.*?)__', text) is not None
+        left = self.left_pattern
+        right = self.right_pattern
+        return re.search(f'{left}(.*?){right}', text) is not None
 
     def contains_special(self, wildcard):
         """
@@ -34,15 +39,22 @@ class WildcardManager:
         Process a given string by replacing all wildcards and specials wildcard recursively.
         Returns retrieved value of the wildcard
         """
-        matches = re.finditer(r'__(.*?)__', text)
+        left = self.left_pattern
+        right = self.right_pattern
+        matches = re.finditer(f'{left}(.*?){right}', text)
 
         for match in matches:
-            wildcard = match.group(1)
-            special_content, wildcard = self.process_specials(wildcard)
-            content = self.get_wildcard_content(wildcard)
+            wildcards = match.group(1)
+            special_content, wildcards = self.process_specials(wildcards)
+
+            content = ''
+            wildcards = self.process_or(wildcards)
+
+            for wildcard in wildcards.split(self.and_pattern):
+                content += self.get_wildcard_content(wildcard.strip())
 
             if special_content or content:
-                text = text.replace('__' + match.group(1) + '__', special_content + content)
+                text = text.replace(self.left_pattern + match.group(1) + self.right_pattern, special_content + content)
 
         return text
 
@@ -75,3 +87,10 @@ class WildcardManager:
     def get_special_content(self, wildcard):
         special = self.specials_dir + self.specials.get(wildcard)
         return self.get_wildcard_content(special)
+
+    def process_or(self, wildcards):
+        if self.or_pattern in wildcards:
+            wildcard = wildcards.split(self.or_pattern)
+            return random.choice(wildcard).strip()
+
+        return wildcards
