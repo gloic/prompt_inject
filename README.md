@@ -10,28 +10,27 @@ It permits to use ```__name__``` syntax to inject the content of one or more tex
 
 ### Quickstart
 
-- Create a file named ```something.txt``` in extensions/prompt-inject/prompts/
-- Edit and write the text you want to inject (For example: "world")
-- Add the wildcard in your prompt : ```Hello __something__```
-- The model will receive "```Hello world```"
+- In "extensions/prompt-inject/prompts/", create a file named ```something.txt``` containing the text ```world``` 
+- When the prompt is ```Hello __something__```
+- The model receives ```Hello world```
 
 ### Sub folders
 
 Prompts files can be stored in sub folders.
 
-Syntax: ```folder/something``` or ```sub/sub1/other```
+Syntax: ```__folder/something__``` or ```__sub/sub1/other__```
 
 <details>
   <summary>Example</summary>
 
-  - Create a file named ```story of.txt``` containing "```Tell me a long and beautiful story about the given character\n\n```"
-  - In a sub folder "**char**", Create a file named ```bob.txt``` containing ```Bob is a man, he is working in a spaceship...```
-  - Use it with:
+  - Create a file named ```story of.txt``` containing ```Tell me a long and beautiful story about the given character\n\n```
+  - In a sub folder "**/char**", create a file named ```bob.txt``` containing ```Bob is a man, he is working in a spaceship...```
+  - When the prompt is:
     ```
     __story of__
     __char/bob__
     ```
-  - THe model will receive 
+  - The model receives:
     ```
     Tell me a long and beautiful story about the given character
     
@@ -39,18 +38,17 @@ Syntax: ```folder/something``` or ```sub/sub1/other```
     ```
 </details>
 
-### Inner wildcard
+### Nested wildcards
 
-A prompt can contains another wildcard, allowing to use a common prompt 
-
-Syntax: ```
+A prompt can contains another wildcards, allowing to nest multiples wildcards in the prompt.
 
 <details>
   <summary>Example</summary>
 
-- Create a file named ```parent.txt``` containing ```A parent __child__```
-- Create a file named ```child.txt``` containing ```and its child```
-- The model will receive "```A parent and its child```"
+  - Create a file named ```parent.txt``` containing ```A parent __child__```
+  - Create a file named ```child.txt``` containing ```and its child```
+  - When the prompt is ```__parent__```
+  - The model receives ```A parent and its child```
 </details>
 
 
@@ -58,9 +56,9 @@ Syntax: ```
 
 Specials wildcards permit to quickly inject a prompt before another wildcard or in your prompt.
 
-- ```__!__``` -> ```specials/exclamation_mark.txt```
-- ```__?__``` -> ```specials/question_mark.txt```
-- ```__&__``` -> ```specials/ampersand.txt```
+- ```__!__``` : ```specials/exclamation_mark.txt```
+- ```__?__``` : ```specials/question_mark.txt```
+- ```__&__``` : ```specials/ampersand.txt```
 
 _Syntax:_ ```__!__``` or ```__!something__```
 
@@ -69,7 +67,8 @@ _Syntax:_ ```__!__``` or ```__!something__```
 
   - Create a file named ```who.txt``` containing ```Who are you ?```
   - The file ```specials/ampersand.txt``` contains ```Think step by step, use the <thinking...</thinking> format...\n```
-  - If your prompt is "```&who```" the model will receive :
+  - When the prompt is ```__&who__```
+  - The model receives :
     ```
       Think step by step, use the <thinking...</thinking> format...
       Who are you ?
@@ -80,8 +79,8 @@ _Syntax:_ ```__!__``` or ```__!something__```
     
 Use combos to combine or pick randomly one prompt.
 
-- "AND" Syntax: ```__promptA&&promptB``` or ```__promptA && promptB``` will concat promptA and promptB
-- "OR" Syntax: ```__promptA||promptB``` or ```__promptA || promptB``` will pick either promptA or promptB
+- "AND" Syntax: ```__promptA&&promptB__``` or ```__promptA && promptB__``` will concat promptA and promptB
+- "OR" Syntax: ```__promptA||promptB__``` or ```__promptA || promptB__``` will pick either promptA or promptB
 
 <details>
   <summary>Example</summary>
@@ -89,14 +88,15 @@ Use combos to combine or pick randomly one prompt.
   #### AND Combo
   - Create a file named ```part1.txt``` containing ```This is Part 1 ```
   - Create a file named ```part2.txt``` containing ```and this is Part 2```
-  - If your prompt is "```__part1||part2__```"
-  - The model will receive ```This is Part 1 and this is Part 2```
+  - When the prompt is ```__part1||part2__```
+  - The model receives ```This is Part 1 and this is Part 2```
 
   #### OR Combo
   - Create a file named ```odd.txt``` containing ```It's odd```
   - Create a file named ```even.txt``` containing ```It's even```
-  - If your prompt is "```__odd||even__```"
-  - The model will receive randomly ```It's odd``` or ```It's even```
+  - Create a file named ```prime.txt``` containing ```It's prime```
+  - When the prompt is ```__odd||even||prime__```
+  - The model receives randomly ```It's odd``` or ```It's even``` or ```It's prime```
 </details>
 
 ## Going further
@@ -109,33 +109,31 @@ Use combos to combine or pick randomly one prompt.
   - Create ```places/kitchen.txt``` containing ```You are in a vaste kitchen...```
   - Create ```places/bedroom.txt``` containing ```You are in the bedroom, the light is off```
   - 
-  - Create ```choices/choice1.txt``` containing ```You take your shoe as a weapon and face to your fears```
-  - Create ```choices/choice1.txt``` containing ```You hear something weird```
-  - Create ```choices.txt``` containing ```__choices/choice1 || choices/choice2__```
+  - Create ```events/event1.txt``` containing ```You take your shoe as a weapon and face to your fears```
+  - Create ```events/event2.txt``` containing ```You hear something weird```
+  - Create ```events.txt``` containing ```__events/event1 || events/event2__```
   - 
   - Create ```rp/describe.txt``` containing ```Describe what happen in this scene```
   - Create ```rp/details.txt``` containing ``` and add a lot of details.```
   - Create ```instructions.txt``` containing:
   ```
-  __place/kitchen || place/bedroom__
-  __choices__
+  __places/kitchen || places/bedroom__
+  __events__
   
   __rp/describe && __rp/details__
   ```
-  - The file ```specials/exclamation_mark.txt``` contains ```Be careful, you are a very weak adventurer, you are already hurt and afraid. Please make a good choice.\n\n```
-  - If your prompt is "```__!instructions__```"
-  - The model will receive randomly a composition of the prompts 
-  ```
-  Be careful, you are a very weak adventurer, you are already hurt and afraid. Please make a good choice.
-  
-  You are in the bedroom, the light is off
-  You hear something weird
-  
-  Describe what happen in this scene and add a lot of details.
-  ```
+  - The file ```specials/exclamation_mark.txt``` contains ```Be careful, you are a very weak adventurer, you are already hurt and afraid.\n\n```
+  - When the prompt is ```__!instructions__```
+  - The model receive randomly a composition of the prompts: 
+    ```
+    Be careful, you are a very weak adventurer, you are already hurt and afraid.
+      
+    You are in the bedroom, the light is off
+    You hear something weird
+      
+    Describe what happen in this scene and add a lot of details.
+    ```
 </details>
-
-
   
 
 ## Compatibility
