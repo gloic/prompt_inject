@@ -22,9 +22,19 @@ class TestWildcardManager_specials(BaseWildcardManagerTest):
 
         self.assertEqual(result, 'This is important')
 
-    def test_should_check_if_contains_specials_wildcards(self):
-        self.assertTrue(self.manager.contains_special('!special'))
-        self.assertFalse(self.manager.contains_special('special'))
+    def test_should_contains_specials_wildcards(self):
+        text = '!special'
+
+        result = self.manager.contains_special(text)
+
+        self.assertTrue(result)
+
+    def test_should_not_contains_specials_wildcards(self):
+        text = 'special'
+
+        result = self.manager.contains_special(text)
+
+        self.assertFalse(result)
 
     def test_should_replace_special_wildcards(self):
         text = '__!__'

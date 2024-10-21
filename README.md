@@ -140,7 +140,12 @@ Use combos to combine or pick randomly one prompt.
 You can have the same prompt in different languages and use them either by default or when needed.
 
 Configuration parameter: ```suffix_language```
-When filled, the extension will look for files suffixed by the value of the parameter. 
+
+When specified, the extension will look for files suffixed by the value of the parameter. 
+
+*Notes:* 
+  - Any suffix can be used: ```salutations-anything.txt``` is valid
+  - If _suffix_language_ is not configured, it's still possible to manually use a wildcard of another language: ```__salutation-fr__``` will look for the file ```salutations-fr.txt```
 
 <details>
   <summary>Example</summary>
@@ -150,9 +155,6 @@ When filled, the extension will look for files suffixed by the value of the para
   - When the prompt is ```__salutations__```
   - The model receives ```Bonjour```
   
-  *Tips:* 
-  - Any suffix can be use (```salutations-anything.txt``` is valid)
-  - If no _suffix_language_ is configured, it's possible to manually use a wildcard of another language ```__salutation-fr__```
 </details>
 
 ## Compatibility
@@ -163,15 +165,7 @@ TODO
 
 - _is_model_warning_: if enabled an error message is injected in the prompt when a wildcard cannot be resolved, allowing the model to warn the user.
 - _error_wildcard_not_found_: error message sent to the model when a wildcard cannot be resolved (depends on _is_model_warning_)
-- _suffix_language_: Use the prompt files suffixed by this value. For example, if the value is 'fr', the wildcard ```__hello__``` will look for the file ```hello-fr.txt```.
-
-## Usage through API
-
-TODO. I don't think this extension is called from the API.
-
-### GUI
-
-TODO
+- _suffix_language_: look for files suffixed by this value. See "Multilanguage" section for more information
 
 ## Other
 

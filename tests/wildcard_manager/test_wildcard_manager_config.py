@@ -22,9 +22,8 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
 
     def test_should_use_default_prompt_when_no_suffix_language_is_defined(self):
         self.create_file('hello.txt', "Hello")
-
-        text = '__hello__'
         self.manager.suffix_language = None
+        text = '__hello__'
 
         result = self.manager.replace_wildcard(text)
 
@@ -32,9 +31,8 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
 
     def test_should_use_configured_suffix_language(self):
         self.create_file('hello-fr.txt', "Bonjour")
-
-        text = '__hello__'
         self.manager.suffix_language = 'fr'
+        text = '__hello__'
 
         result = self.manager.replace_wildcard(text)
 
@@ -42,20 +40,28 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
 
     def test_should_use_default_file_if_suffixed_is_not_found(self):
         self.create_file('hello.txt', "Hello")
-
-        text = '__hello__'
         self.manager.suffix_language = 'fr'
+        text = '__hello__'
 
         result = self.manager.replace_wildcard(text)
 
         self.assertEqual('Hello', result)
 
-    def test_should_use_the_file_suffixed_as_is(self):
-        self.create_file('something-lu.txt', "Gromperekichelcher")
-
-        text = '__something-lu__'
+    def test_should_use_file_when_no_language_set(self):
+        self.create_file('schueberfouer-lu.txt', "Gromperekichelcher")
         self.manager.suffix_language = None
+        text = '__schueberfouer-lu__'
 
         result = self.manager.replace_wildcard(text)
 
         self.assertEqual('Gromperekichelcher', result)
+
+    def test_should_replace_when_custom_pattern_is_configured(self):
+        self.create_file('custom.txt', "design is very human")
+        self.manager.left_pattern = "}}"
+        self.manager.right_pattern = "-@!-"
+        text = '}}custom-@!-'
+
+        result = self.manager.replace_wildcard(text)
+
+        self.assertEqual('design is very human', result)

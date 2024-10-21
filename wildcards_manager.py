@@ -1,11 +1,13 @@
-import os
 import random
 import re
+
+from extensions.prompt_inject.utils.file_util import FilesUtil
 
 
 class WildcardManager:
     def __init__(self, params):
         self.apply_params(params)
+        self.file_util = FilesUtil()
 
         # Specials
         self.specials_dir = 'specials/'
@@ -45,7 +47,7 @@ class WildcardManager:
             special_content, wildcards = self.process_specials(wildcards)
 
             # OR pattern
-            wildcards = self.process_or(wildcards)
+            wildcards = self.process_or(wildcards, self.or_pattern)
 
             content = ''
             # AND pattern
@@ -98,28 +100,16 @@ class WildcardManager:
         else:
             return wildcard
 
-    def resolve_file_path(self, wildcard, suffix=None):
-        # Apply suffix
-        suffix = '-' + suffix if suffix else ''
-        filename = wildcard + suffix + ".txt"
-
-        return os.path.join(self.base_path, *filename.split('/'))
-
     def get_content_prompt_file(self, wildcard):
         """
         Returns the prompt corresponding to a given wildcard. If the file cannot be found, return the wildcard itself.
         """
-        file_path = self.resolve_file_path(wildcard, self.suffix_language)
-        if self.suffix_language and not os.path.exists(file_path):
-            # get default file without suffix
-            file_path = self.resolve_file_path(wildcard, None)
-
-        if os.path.exists(file_path):
-            print("File found:", file_path)
-            with open(file_path, "r") as file:
-                return file.read().strip()
-
-        return self.handle_missing_wildcard(wildcard)
+        file_path = self.file_util.get_file_path(wildcard, self.base_path, self.suffix_language)
+        file_content = self.file_util.get_file_content(file_path)
+        if file_content:
+            return file_content
+        else:
+            return self.handle_missing_wildcard(wildcard)
 
     def get_wildcard_content(self, wildcard):
         if not wildcard:
@@ -140,12 +130,12 @@ class WildcardManager:
         special = self.specials_dir + self.specials.get(wildcard)
         return self.get_wildcard_content(special)
 
-    def process_or(self, wildcards):
+    def process_or(self, wildcards, or_pattern):
         """
         Return randomly one wildcard if the OR pattern is present in the input string
         """
-        if self.or_pattern in wildcards:
-            wildcard = wildcards.split(self.or_pattern)
+        if or_pattern in wildcards:
+            wildcard = wildcards.split(or_pattern)
             return random.choice(wildcard).strip()
 
         return wildcards

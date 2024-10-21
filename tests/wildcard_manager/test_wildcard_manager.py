@@ -3,15 +3,19 @@ from extensions.prompt_inject.tests.wildcard_manager.base_wildcard_manager impor
 
 class TestWildcardManager(BaseWildcardManagerTest):
 
-    def test_should_check_if_contains_wildcards(self):
-        with_wildcard = 'This is a __test__'
-        without_wildcards = 'This is a text without wildcards'
+    def test_should_contains_wildcards(self):
+        text = 'This is a __test__'
 
-        result_with = self.manager.contains_wildcards(with_wildcard)
-        result_without = self.manager.contains_wildcards(without_wildcards)
+        result_with = self.manager.contains_wildcards(text)
 
         self.assertTrue(result_with)
-        self.assertFalse(result_without)
+
+    def test_should_not_contains_wildcards(self):
+        text = 'This is a text without wildcards'
+
+        result = self.manager.contains_wildcards(text)
+
+        self.assertFalse(result)
 
     def test_should_retrieve_content(self):
         self.create_file('name.txt', "Bobby")
