@@ -3,6 +3,11 @@ from extensions.prompt_inject.tests.wildcard_manager.base_wildcard_manager impor
 
 class TestWildcardManager_combos(BaseWildcardManagerTest):
 
+    def setUp(self):
+        super().setUp()
+        self.manager.or_pattern = '||'
+        self.manager.and_pattern = '&&'
+
     def test_AND_should_concat_multiple_wildcards(self):
         self.create_file('part1.txt', "Part1")
         self.create_file('part2.txt', "Part2")
@@ -14,9 +19,9 @@ class TestWildcardManager_combos(BaseWildcardManagerTest):
     def test_OR_should_return_random_wildcards(self):
         self.create_file('odd.txt', "Odd")
         self.create_file('even.txt', "Even")
-        self.create_file('Ded.txt', "Ded", self.sub_dir)
-        expected_values = ['Odd', 'Even', 'Ded']
+        self.create_file('prime.txt', "Prime", self.sub_dir)
+        expected_values = ['Odd', 'Even', 'Prime']
 
-        result = self.manager.replace_wildcard('__odd || even || sub/Ded__')
+        result = self.manager.replace_wildcard('__odd || even || sub/prime__')
 
         self.assertIn(result, expected_values)

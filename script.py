@@ -8,11 +8,22 @@ params = {
 
     "manager": {
         "base_path": "extensions/prompt_inject/prompts",
+        "suffix_language": None,
         "is_model_warning": True,
-        "left_pattern": "__",
-        "right_pattern": "__"
+        "error_wildcard_not_found": '\nWildcard error : the wildcard "{}" has no corresponding file. Please give me a short and concise warning that this wildcard cannot be resolved.\n',
+        "patterns": {
+            "left": "__",
+            "right": "__",
+            "and": '&&',
+            "or": '||'
+        }
     }
 }
+
+
+def setup():
+    global manager
+    manager = WildcardManager(params['manager'])
 
 
 def chat_input_modifier(text, visible_text, state):
@@ -21,14 +32,12 @@ def chat_input_modifier(text, visible_text, state):
     You can also modify the internal representation of the user
     input (text) to change how it will appear in the prompt.
     """
-
-    manager = WildcardManager(params['manager'])
+    # manager = WildcardManager(params['manager'])
 
     if not manager.contains_wildcards(text):
         return text, visible_text
 
     text = manager.replace_wildcard(text)
-
     return text, visible_text
 
 

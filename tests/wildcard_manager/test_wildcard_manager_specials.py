@@ -1,7 +1,19 @@
+import os
+
 from extensions.prompt_inject.tests.wildcard_manager.base_wildcard_manager import BaseWildcardManagerTest
 
 
 class TestWildcardManager_specials(BaseWildcardManagerTest):
+
+    def setUp(self):
+        super().setUp()
+
+        self.special_dir = os.path.join(self.test_dir, "specials")
+        os.makedirs(self.special_dir, exist_ok=True)
+
+        self.create_file('exclamation_mark.txt', "This is important", self.special_dir)
+        self.create_file('question_mark.txt', "This is a question", self.special_dir)
+        self.create_file('ampersand.txt', "This is COT", self.special_dir)
 
     def test_should_retrieve_special_wildcard_content(self):
         text = 'specials/exclamation_mark'

@@ -10,19 +10,18 @@ class BaseWildcardManagerTest(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         self.sub_dir = os.path.join(self.test_dir, "sub")
-        self.special_dir = os.path.join(self.test_dir, "specials")
 
         os.makedirs(self.sub_dir, exist_ok=True)
-        os.makedirs(self.special_dir, exist_ok=True)
-
-        self.create_file('exclamation_mark.txt', "This is important", self.special_dir)
-        self.create_file('question_mark.txt', "This is a question", self.special_dir)
-        self.create_file('ampersand.txt', "This is COT", self.special_dir)
 
         params = {
             "base_path": self.test_dir,
-            "left_pattern": "__",
-            "right_pattern": "__",
+            "language": "en",
+            "patterns": {
+                "left": "__",
+                "right": "__",
+                "and": "&&",
+                "or": "||"
+            },
             "is_model_warning": "False",
         }
         self.manager = WildcardManager(params)

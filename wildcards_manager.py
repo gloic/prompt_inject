@@ -5,18 +5,7 @@ import re
 
 class WildcardManager:
     def __init__(self, params):
-
-        # TODO - replace this
-        # base_path='extensions/prompt_inject/prompts'
-
-        self.base_path = params.get('base_path')
-        self.left_pattern = params.get('left_pattern')
-        self.right_pattern = params.get('right_pattern')
-        self.is_model_warning = params.get('is_model_warning')
-
-        # Combos
-        self.and_pattern = '&&'
-        self.or_pattern = '||'
+        self.apply_params(params)
 
         # Specials
         self.specials_dir = 'specials/'
@@ -26,16 +15,30 @@ class WildcardManager:
             '&': 'ampersand'
         }
 
+    def apply_params(self, params):
+        self.base_path = params.get('base_path')
+        self.suffix_language = params.get('suffix_language')
+
+        patterns = params.get('patterns')
+        self.left_pattern = patterns.get('left')
+        self.right_pattern = patterns.get('right')
+        self.and_pattern = patterns.get('and')
+        self.or_pattern = patterns.get('or')
+
+        self.is_model_warning = params.get('is_model_warning')
+        self.error_wildcard_not_found = params.get('error_wildcard_not_found')
+
     def replace_wildcard(self, text):
         """
         Process a given string by replacing all wildcards and specials wildcard recursively.
         Returns retrieved value of the wildcard
         """
+        if not self.contains_wildcards(text):
+            return text
+
         left = self.left_pattern
         right = self.right_pattern
-        matches = re.finditer(f'{left}(.*?){right}', text)
-
-        for match in matches:
+        for match in re.finditer(f'{left}(.*?){right}', text):
             wildcards = match.group(1)
 
             # Special pattern
@@ -58,9 +61,9 @@ class WildcardManager:
         """
         Returns true when the input text contains at least one wildcard.
         """
-        left = self.left_pattern
-        right = self.right_pattern
-        return re.search(f'{left}(.*?){right}', text) is not None
+        left_pattern = self.left_pattern
+        right_pattern = self.right_pattern
+        return re.search(f'{left_pattern}(.*?){right_pattern}', text) is not None
 
     def contains_special(self, wildcard):
         """
@@ -86,27 +89,44 @@ class WildcardManager:
 
         return special_content, wildcard
 
+    def get_missing_wildcard_warning_message(self, wildcard):
+        return self.error_wildcard_not_found.format(wildcard)
+
+    def handle_missing_wildcard(self, wildcard):
+        if self.is_model_warning:
+            return self.get_missing_wildcard_warning_message(wildcard)
+        else:
+            return wildcard
+
+    def resolve_file_path(self, wildcard, suffix=None):
+        # Apply suffix
+        suffix = '-' + suffix if suffix else ''
+        filename = wildcard + suffix + ".txt"
+
+        return os.path.join(self.base_path, *filename.split('/'))
+
     def get_content_prompt_file(self, wildcard):
         """
         Returns the prompt corresponding to a given wildcard. If the file cannot be found, return the wildcard itself.
         """
-        filename = wildcard + ".txt"
-        file_path = os.path.join(self.base_path, *filename.split('/'))
+        file_path = self.resolve_file_path(wildcard, self.suffix_language)
+        if self.suffix_language and not os.path.exists(file_path):
+            # get default file without suffix
+            file_path = self.resolve_file_path(wildcard, None)
+
         if os.path.exists(file_path):
             print("File found:", file_path)
             with open(file_path, "r") as file:
                 return file.read().strip()
 
-        if self.is_model_warning:
-            return '\nSyntax error : wildcard "' + wildcard + '" not found : the wildcard "' + wildcard + '" has no corresponding file. Please warn the user in a very short and concise message that this wildcard cannot be resolved.\n'
-        else:
-            return wildcard
+        return self.handle_missing_wildcard(wildcard)
 
     def get_wildcard_content(self, wildcard):
         if not wildcard:
             return ''
 
         content = self.get_content_prompt_file(wildcard)
+
         # Handle nested wildcards if needed
         if self.contains_wildcards(content):
             return self.replace_wildcard(content)

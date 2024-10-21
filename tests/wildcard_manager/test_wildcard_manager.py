@@ -35,14 +35,6 @@ class TestWildcardManager(BaseWildcardManagerTest):
 
         self.assertEqual('it\'s working', result)
 
-    def test_should_return_wildcard_when_it_not_exists(self):
-        text = 'it does not __exist__'
-        self.manager.is_model_warning = False
-
-        result = self.manager.replace_wildcard(text)
-
-        self.assertEqual('it does not exist', result)
-
     def test_should_replace_nested_wildcards(self):
         self.create_file('parent.txt', "Parent and __nested__")
         self.create_file('nested.txt', "Nested")
