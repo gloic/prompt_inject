@@ -8,7 +8,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.is_model_warning = True
         self.manager.error_wildcard_not_found = '\nerror "{}" not found\n'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('it does not \nerror "unknown" not found\n', result)
 
@@ -16,7 +16,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         text = 'it does not __unknown__'
         self.manager.is_model_warning = False
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('it does not unknown', result)
 
@@ -25,7 +25,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.suffix_language = None
         text = '__hello__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('Hello', result)
 
@@ -34,7 +34,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.suffix_language = 'fr'
         text = '__hello__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('Bonjour', result)
 
@@ -43,7 +43,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.suffix_language = 'fr'
         text = '__hello__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('Hello', result)
 
@@ -52,7 +52,7 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.suffix_language = None
         text = '__schueberfouer-lu__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('Gromperekichelcher', result)
 
@@ -62,6 +62,6 @@ class TestWildcardManager_config(BaseWildcardManagerTest):
         self.manager.right_pattern = "-@!-"
         text = '}}custom-@!-'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('design is very human', result)

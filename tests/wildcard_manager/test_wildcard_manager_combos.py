@@ -12,7 +12,7 @@ class TestWildcardManager_combos(BaseWildcardManagerTest):
         self.create_file('part1.txt', "Part1")
         self.create_file('part2.txt', "Part2")
 
-        result = self.manager.replace_wildcard('__part1&& part2__')
+        result = self.manager._replace_wildcard('__part1&& part2__')
 
         self.assertEqual('Part1Part2', result)
 
@@ -22,6 +22,6 @@ class TestWildcardManager_combos(BaseWildcardManagerTest):
         self.create_file('prime.txt', "Prime", self.sub_dir)
         expected_values = ['Odd', 'Even', 'Prime']
 
-        result = self.manager.replace_wildcard('__odd || even || sub/prime__')
+        result = self.manager._replace_wildcard('__odd || even || sub/prime__')
 
         self.assertIn(result, expected_values)

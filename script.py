@@ -1,5 +1,4 @@
-import gradio as gr
-
+from extensions.prompt_inject.wildcard_manager_ui import WildcardManagerUI
 from extensions.prompt_inject.wildcards_manager import WildcardManager
 
 params = {
@@ -23,7 +22,9 @@ params = {
 
 def setup():
     global manager
+    global extension_ui
     manager = WildcardManager(params['manager'])
+    extension_ui = WildcardManagerUI(params['manager'], manager)
 
 
 def chat_input_modifier(text, visible_text, state):
@@ -32,20 +33,15 @@ def chat_input_modifier(text, visible_text, state):
     You can also modify the internal representation of the user
     input (text) to change how it will appear in the prompt.
     """
-    if manager.contains_wildcards(text):
-        text = manager.replace_wildcard(text)
-        return text, visible_text
-
-    return text, visible_text
+    return manager.process(text, visible_text)
 
 
 def ui():
-    with gr.Accordion("Prompt Inject", open=False, elem_classes="Prompt Inject"):
-        with gr.Row():
-            model_warning = gr.Checkbox(value=params['manager']['is_model_warning'], label='Model warning', info="If enabled, the model warn you when an unknown wildcard is used.")
+    """
+    Gets executed when the UI is drawn. Custom gradio elements and
+    their corresponding event handlers should be defined here.
 
-            def update_and_apply(is_model_warning):
-                params['manager'].update({'is_model_warning': is_model_warning})
-                manager.apply_params(params['manager'])
-
-            model_warning.change(update_and_apply, model_warning, None)
+    To learn about gradio components, check out the docs:
+    https://gradio.app/docs/
+    """
+    extension_ui.generate()

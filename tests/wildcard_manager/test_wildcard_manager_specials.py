@@ -18,44 +18,44 @@ class TestWildcardManager_specials(BaseWildcardManagerTest):
     def test_should_retrieve_special_wildcard_content(self):
         text = 'specials/exclamation_mark'
 
-        result = self.manager.get_wildcard_content(text)
+        result = self.manager._get_wildcard_content(text)
 
         self.assertEqual(result, 'This is important')
 
     def test_should_contains_specials_wildcards(self):
         text = '!special'
 
-        result = self.manager.contains_special(text)
+        result = self.manager._contains_special(text)
 
         self.assertTrue(result)
 
     def test_should_not_contains_specials_wildcards(self):
         text = 'special'
 
-        result = self.manager.contains_special(text)
+        result = self.manager._contains_special(text)
 
         self.assertFalse(result)
 
     def test_should_replace_special_wildcards(self):
         text = '__!__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('This is important', result)
 
     def test_should_replace_multiple_special_wildcards(self):
         text = '__!?__'
 
-        result = self.manager.replace_wildcard(text)
+        result = self.manager._replace_wildcard(text)
 
         self.assertEqual('This is importantThis is a question', result)
 
     def test_should_replace_special_wildcards_with_text(self):
         self.create_file('hello.txt', "Hello")
 
-        exclamation_result = self.manager.replace_wildcard('__!hello__')
-        question_result = self.manager.replace_wildcard('__?hello__')
-        cot_result = self.manager.replace_wildcard('__&hello__')
+        exclamation_result = self.manager._replace_wildcard('__!hello__')
+        question_result = self.manager._replace_wildcard('__?hello__')
+        cot_result = self.manager._replace_wildcard('__&hello__')
 
         self.assertEqual('This is importantHello', exclamation_result)
         self.assertEqual('This is a questionHello', question_result)
@@ -66,6 +66,6 @@ class TestWildcardManager_specials(BaseWildcardManagerTest):
         self.create_file('name.txt', "Bob")
         self.create_file('riddle.txt', "I am the one who I am but not what you are")
 
-        result = self.manager.replace_wildcard('__!hello__')
+        result = self.manager._replace_wildcard('__!hello__')
 
         self.assertEqual('This is importantHello Bob' ', This is COTI am the one who I am but not what you are', result)
