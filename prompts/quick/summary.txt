@@ -1,0 +1,7 @@
+This conversation is very interesting and I would like to be able to reuse the information that you have given me and those that you have provided to me.
+
+I need you to make a summary of the conversation so that I can copy/paste your summary to prepare a context for LLM which will provide all the exchanged information.
+
+Be sure to keep as much relevant information as possible so that we can know everything about the discussion by reading only your summary.
+
+Now, summarize the conversation above.
